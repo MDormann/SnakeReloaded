@@ -5,11 +5,14 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="SnakeReloaded.UI.MainWindow"
         Title="SnakeReloaded.UI">
-    
-    <Canvas x:Name="MainArea">
-        <Border BorderBrush="Black"
-                BorderThickness="2">
-           <Grid ShowGridLines="True" x:Name="SpielfeldGrid"/> 
-        </Border>
-    </Canvas>
+    <StackPanel>
+        <Canvas x:Name="MainArea">
+            <Border BorderBrush="Black"
+                    BorderThickness="2">
+               <Grid ShowGridLines="True" x:Name="SpielfeldGrid"/> 
+            </Border>
+        </Canvas>
+        
+        <Label x:Name="output"></Label>
+    </StackPanel>
 </Window>

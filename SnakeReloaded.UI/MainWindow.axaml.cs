@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using Avalonia;
@@ -15,6 +16,7 @@ namespace SnakeReloaded.UI;
 public partial class MainWindow : Window
 {
     private Spielfeld _spielfeld;
+    private Timer _timer = new Timer(300);
     
     public MainWindow()
     {
@@ -37,15 +39,14 @@ public partial class MainWindow : Window
         }
 
         var randomStartpunk = new Random().Next(0,_spielfeld.AnzahlSpalten-1);
-        var randomItem = new Random().Next(0,_spielfeld.AnzahlSpalten-1);
-
-        _spielfeld.AktuellesItem = new ItemFeld(randomItem, randomItem );
         _spielfeld.SchlangenKopf = new SnakeFeld(randomStartpunk, randomStartpunk);
 
-        var timer = new Timer(150);
-        timer.Enabled = true;
-        timer.Start();
-        timer.Elapsed += TimerOnElapsed;
+        _spielfeld.GetNextItem();
+
+        
+        _timer.Enabled = true;
+        _timer.Start();
+        _timer.Elapsed += TimerOnElapsed;
         
         KeyUp += OnKeyUp;
     }
@@ -63,19 +64,23 @@ public partial class MainWindow : Window
         switch (e.Key)
         {
             case Key.Left:
-                _spielfeld.Richtung = Richtung.links;
+                if(_spielfeld.Richtung != Richtung.rechts)
+                    _spielfeld.Richtung = Richtung.links;
                 
                 break;
             case Key.Right:
-                _spielfeld.Richtung = Richtung.rechts;
+                if(_spielfeld.Richtung != Richtung.links)
+                    _spielfeld.Richtung = Richtung.rechts;
                 
                 break;
             case Key.Up:
-                _spielfeld.Richtung = Richtung.hoch;
+                if(_spielfeld.Richtung != Richtung.runter)
+                    _spielfeld.Richtung = Richtung.hoch;
                 
                 break;
             case Key.Down:
-                _spielfeld.Richtung = Richtung.runter;
+                if(_spielfeld.Richtung != Richtung.hoch)
+                    _spielfeld.Richtung = Richtung.runter;
                 
                 break;
         }
@@ -88,11 +93,34 @@ public partial class MainWindow : Window
         SpielfeldGrid.Children.Clear();
 
         var nextFeldIndex = GetNextFeld(_spielfeld.SchlangenKopf);
+        var nextFeld = _spielfeld.GetFeld(nextFeldIndex.spalte, nextFeldIndex.zeile);
+
+        if (nextFeld is ItemFeld)
+        {
+            _spielfeld.SchlangenBody.Insert(0, _spielfeld.SchlangenKopf);
+            _spielfeld.SchlangenKopf = new SnakeFeld(nextFeld.x, nextFeld.y);
+
+            _spielfeld.GetNextItem();
+            
+            if(_timer.Interval >= 50)
+                _timer.Interval -= 10;
+        } else if (nextFeld is SnakeFeld)
+        {
+            output.Content = "Game Over!";
+            _timer.Stop();
+        }
+        else if(_spielfeld.SchlangenBody.Any())
+        {
+            _spielfeld.SchlangenBody.Insert(0, _spielfeld.SchlangenKopf);
+            var lastItem = _spielfeld.SchlangenBody.FindLast(x => 1 == 1);
+            _spielfeld.SchlangenKopf = lastItem;
+            
+            _spielfeld.SchlangenBody.Remove(lastItem);
+        }
+        
         _spielfeld.SchlangenKopf.x = nextFeldIndex.spalte;
         _spielfeld.SchlangenKopf.y = nextFeldIndex.zeile;
 
-        //TODO: Auch beachten, dass der Schlangenbody sich mit bewegen muss.
-        
 
         for (int x = 0; x < _spielfeld.AnzahlSpalten; x++)
         {

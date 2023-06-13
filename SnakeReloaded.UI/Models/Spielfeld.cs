@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SnakeReloaded.UI.Models;
 
@@ -8,7 +10,7 @@ public class Spielfeld
     public int AnzahlZeilen = 20;
 
     public SnakeFeld SchlangenKopf;
-    public List<SnakeFeld> SchlangenBody;
+    public List<SnakeFeld> SchlangenBody = new();
     public ItemFeld AktuellesItem;
     
     public Richtung Richtung = Richtung.rechts;
@@ -35,10 +37,40 @@ public class Spielfeld
         //Prüfen, ob Schlangekopf(done), Body oder Item hinter der X oder Y Koordinate ist
         if (SchlangenKopf.x == x && SchlangenKopf.y == y)
             return SchlangenKopf;
+
+        if (AktuellesItem?.x == x && AktuellesItem?.y == y)
+        {
+            return AktuellesItem;
+        }
+
+        // foreach (var snakeFeld in SchlangenBody)
+        // {
+        //     if (snakeFeld.x == x && snakeFeld.y == y)
+        //         return snakeFeld;
+        // }
+        var snakeBody = SchlangenBody?.FirstOrDefault(snake => snake.x == x && snake.y == y);
+        if(snakeBody != null)
+        {
+            return snakeBody;
+        }
         
-        //if(ist hier ein Item)
 
         return new Feld(x,y);
+    }
+
+    public ItemFeld GetNextItem()
+    {
+        var randomItem = new Random();
+        var nextItem = new ItemFeld(randomItem.Next(0,AnzahlSpalten-1), randomItem.Next(0,AnzahlSpalten-1) );
+
+        while (GetFeld(nextItem.x, nextItem.y) is SnakeFeld)
+        {
+            nextItem = GetNextItem();
+        }
+
+        AktuellesItem = nextItem;
+        
+        return nextItem;
     }
 }
 
