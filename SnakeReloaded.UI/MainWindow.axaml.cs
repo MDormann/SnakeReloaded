@@ -39,16 +39,14 @@ public partial class MainWindow : Window
         var randomStartpunk = new Random().Next(0,_spielfeld.AnzahlSpalten-1);
         var randomItem = new Random().Next(0,_spielfeld.AnzahlSpalten-1);
 
-        _spielfeld.SpielfeldInhalt[randomStartpunk][randomStartpunk] = new SnakeFeld();
-        _spielfeld.SpielfeldInhalt[randomItem][randomItem] = new ItemFeld();
-
-        _spielfeld.Pointer = new Position(randomStartpunk, randomStartpunk);
+        _spielfeld.AktuellesItem = new ItemFeld(randomItem, randomItem );
+        _spielfeld.SchlangenKopf = new SnakeFeld(randomStartpunk, randomStartpunk);
 
         var timer = new Timer(150);
         timer.Enabled = true;
         timer.Start();
-        
         timer.Elapsed += TimerOnElapsed;
+        
         KeyUp += OnKeyUp;
     }
 
@@ -89,22 +87,19 @@ public partial class MainWindow : Window
     {
         SpielfeldGrid.Children.Clear();
 
-        var nextFeldIndex = GetNextFeld(_spielfeld.Pointer);
+        var nextFeldIndex = GetNextFeld(_spielfeld.SchlangenKopf);
+        _spielfeld.SchlangenKopf.x = nextFeldIndex.spalte;
+        _spielfeld.SchlangenKopf.y = nextFeldIndex.zeile;
+
+        //TODO: Auch beachten, dass der Schlangenbody sich mit bewegen muss.
         
-        //Hier die Prüfung & Logik
-        
-        var nextFeld = _spielfeld.SpielfeldInhalt[nextFeldIndex.spalte][nextFeldIndex.zeile];
-        _spielfeld.SpielfeldInhalt[nextFeldIndex.spalte][nextFeldIndex.zeile] = _spielfeld.SpielfeldInhalt[_spielfeld.Pointer.spalte][_spielfeld.Pointer.zeile];
-        _spielfeld.SpielfeldInhalt[_spielfeld.Pointer.spalte][_spielfeld.Pointer.zeile] = nextFeld;
-        
-        _spielfeld.Pointer.spalte = nextFeldIndex.spalte;
-        _spielfeld.Pointer.zeile = nextFeldIndex.zeile;
-        
-        for (int i = 0; i < _spielfeld.SpielfeldInhalt.Count; i++)
+
+        for (int x = 0; x < _spielfeld.AnzahlSpalten; x++)
         {
-            for (int j = 0; j < _spielfeld.SpielfeldInhalt[i].Count; j++)
+            for (int y = 0; y < _spielfeld.AnzahlZeilen; y++)
             {
-                var feld = _spielfeld.SpielfeldInhalt[i][j];
+                var feld = _spielfeld.GetFeld(x, y);
+                
                 Shape uiElement = new Rectangle();
                 
                 if (feld is SnakeFeld)
@@ -114,8 +109,8 @@ public partial class MainWindow : Window
                         Width = 20,
                         Height = 20,
                         Fill = Brushes.Green,
-                        [!Grid.RowProperty] = new IndexerBinding(SpielfeldGrid, new AttachedProperty<int>("Row", typeof(Grid), new(j)), BindingMode.Default),
-                        [!Grid.ColumnProperty] = new IndexerBinding(SpielfeldGrid, new AttachedProperty<int>("Column", typeof(Grid), new(i)), BindingMode.Default),
+                        [!Grid.RowProperty] = new IndexerBinding(SpielfeldGrid, new AttachedProperty<int>("Row", typeof(Grid), new(y)), BindingMode.Default),
+                        [!Grid.ColumnProperty] = new IndexerBinding(SpielfeldGrid, new AttachedProperty<int>("Column", typeof(Grid), new(x)), BindingMode.Default),
                     };
                 } else if (feld is ItemFeld)
                 {
@@ -124,8 +119,8 @@ public partial class MainWindow : Window
                         Width = 20,
                         Height = 20,
                         Fill = Brushes.Red,
-                        [!Grid.RowProperty] = new IndexerBinding(SpielfeldGrid, new AttachedProperty<int>("Row", typeof(Grid), new(j)), BindingMode.Default),
-                        [!Grid.ColumnProperty] = new IndexerBinding(SpielfeldGrid, new AttachedProperty<int>("Column", typeof(Grid), new(i)), BindingMode.Default),
+                        [!Grid.RowProperty] = new IndexerBinding(SpielfeldGrid, new AttachedProperty<int>("Row", typeof(Grid), new(y)), BindingMode.Default),
+                        [!Grid.ColumnProperty] = new IndexerBinding(SpielfeldGrid, new AttachedProperty<int>("Column", typeof(Grid), new(x)), BindingMode.Default),
                     };
                 }
 
@@ -136,7 +131,7 @@ public partial class MainWindow : Window
 
 
 
-    private Position GetNextFeld(Position spielfeldPointer)
+    private Position GetNextFeld(Feld spielfeldPointer)
     {
         var nextSpalte = 0;
         var nextZeile = 0;
@@ -144,23 +139,23 @@ public partial class MainWindow : Window
         switch (_spielfeld.Richtung)
         {
             case Richtung.links:
-                nextSpalte = spielfeldPointer.spalte - 1;
-                nextZeile = spielfeldPointer.zeile;
+                nextSpalte = spielfeldPointer.x - 1;
+                nextZeile = spielfeldPointer.y;
                 
                 break;
             case Richtung.rechts:
-                nextSpalte = spielfeldPointer.spalte + 1;
-                nextZeile = spielfeldPointer.zeile;
+                nextSpalte = spielfeldPointer.x + 1;
+                nextZeile = spielfeldPointer.y;
                 
                 break;
             case Richtung.hoch:
-                nextSpalte = spielfeldPointer.spalte;
-                nextZeile = spielfeldPointer.zeile - 1;
+                nextSpalte = spielfeldPointer.x;
+                nextZeile = spielfeldPointer.y - 1;
                 
                 break;
             case Richtung.runter:
-                nextSpalte = spielfeldPointer.spalte;
-                nextZeile = spielfeldPointer.zeile + 1;
+                nextSpalte = spielfeldPointer.x;
+                nextZeile = spielfeldPointer.y + 1;
                 
                 break;
         }
