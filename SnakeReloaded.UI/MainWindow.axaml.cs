@@ -39,12 +39,8 @@ public partial class MainWindow : Window
             SpielfeldGrid.RowDefinitions.Add(new RowDefinition(new GridLength(25)));
         }
 
-        var randomStartpunk = new Random().Next(0,_spielfeld.AnzahlSpalten-1);
-        _spielfeld.SchlangenKopf = new SnakeFeld(randomStartpunk, randomStartpunk);
+        _spielfeld.StartGame();
 
-        _spielfeld.GetNextItem();
-
-        
         _timer.Enabled = true;
         _timer.Start();
         _timer.Elapsed += TimerOnElapsed;
@@ -96,16 +92,20 @@ public partial class MainWindow : Window
         var nextFeldIndex = GetNextFeld(_spielfeld.SchlangenKopf);
         var nextFeld = _spielfeld.GetFeld(nextFeldIndex.spalte, nextFeldIndex.zeile);
 
-        if (nextFeld is ItemFeld)
+        if (nextFeld is ItemFeld && nextFeld is not GameOverItemFeld)
         {
             _spielfeld.SchlangenBody.Insert(0, _spielfeld.SchlangenKopf);
             _spielfeld.SchlangenKopf = new SnakeFeld(nextFeld.x, nextFeld.y);
 
             _spielfeld.GetNextItem();
+            _spielfeld.GesammelteItems += 1;
+            _spielfeld.Score += 100;
+
+            this.score.Content = $"Punktestand: {_spielfeld.Score}";
             
             if(_timer.Interval >= 50)
                 _timer.Interval -= 10;
-        } else if (nextFeld is SnakeFeld)
+        } else if (nextFeld is SnakeFeld || nextFeld is GameOverItemFeld)
         {
             output.Content = "Game Over!";
             _timer.Stop();
@@ -218,6 +218,10 @@ public partial class MainWindow : Window
 
     private void Button_OnClick(object? sender, RoutedEventArgs e)
     {
-        //Hier kommt die Logik zum Restart rein.
+        _timer.Interval = 300;
+        _spielfeld.ResetGame();
+        _spielfeld.StartGame();
+
+        _timer.Start();
     }
 }

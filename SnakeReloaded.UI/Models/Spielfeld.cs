@@ -21,6 +21,28 @@ public class Spielfeld
 
     public Spielfeld()
     { }
+
+    public void StartGame()
+    {
+        var randomStartpunk = new Random().Next(0,AnzahlSpalten-1);
+        SchlangenKopf = new SnakeFeld(randomStartpunk, randomStartpunk);
+        GetNextItem();
+        
+        var freeItem = FindFreeItemFeld();
+            
+        GameOverItemFelds.Add(new GameOverItemFeld(freeItem.x, freeItem.y));
+    }
+
+    public void ResetGame()
+    {
+        SchlangenBody?.Clear();
+        GameOverItemFelds?.Clear();
+
+        SchlangenKopf = null;
+        AktuellesItem = null;
+        Score = 0;
+        GesammelteItems = 0;
+    }
     
     public Feld GetFeld(int x, int y)
     {
@@ -31,6 +53,12 @@ public class Spielfeld
         if (AktuellesItem?.x == x && AktuellesItem?.y == y)
         {
             return AktuellesItem;
+        }
+        
+        var gameOverItem = GameOverItemFelds?.FirstOrDefault(gameOverFeld => gameOverFeld.x == x && gameOverFeld.y == y);
+        if(gameOverItem != null)
+        {
+            return gameOverItem;
         }
 
         // foreach (var snakeFeld in SchlangenBody)
@@ -50,18 +78,33 @@ public class Spielfeld
 
     public ItemFeld GetNextItem()
     {
-        var randomItem = new Random();
-        var nextItem = new ItemFeld(randomItem.Next(0,AnzahlSpalten-1), randomItem.Next(0,AnzahlSpalten-1) );
-
-        while (GetFeld(nextItem.x, nextItem.y) is SnakeFeld)
-        {
-            nextItem = GetNextItem();
-        }
+        var nextItem = FindFreeItemFeld();
 
         AktuellesItem = nextItem;
+
+        if (GesammelteItems != 0 && GesammelteItems % 10d == 0)
+        {
+            var freeItem = FindFreeItemFeld();
+            
+            GameOverItemFelds.Add(new GameOverItemFeld(freeItem.x, freeItem.y));
+        }
         
         return nextItem;
     }
+
+    public ItemFeld FindFreeItemFeld()
+    {
+        var randomItem = new Random();
+        var nextItem = new ItemFeld(randomItem.Next(0,AnzahlSpalten-1), randomItem.Next(0,AnzahlSpalten-1) );
+
+        while (GetFeld(nextItem.x, nextItem.y) is SnakeFeld or ItemFeld)
+        {
+            nextItem = FindFreeItemFeld();
+        }
+
+        return nextItem;
+    }
+    
 }
 
 public class Position
