@@ -12,29 +12,19 @@ public class Spielfeld
     public SnakeFeld SchlangenKopf;
     public List<SnakeFeld> SchlangenBody = new();
     public ItemFeld AktuellesItem;
+
+    public List<GameOverItemFeld> GameOverItemFelds = new();
+    public int Score = 0;
+    public int GesammelteItems = 0; 
     
     public Richtung Richtung = Richtung.rechts;
 
-    //public List<List<Feld>> SpielfeldInhalt = new List<List<Feld>>();
-    
     public Spielfeld()
-    {
-        // for (int i = 0; i < AnzahlSpalten; i++)
-        // {
-        //     var newSpalte = new List<Feld>(); 
-        //     
-        //     for (int j = 0; j < AnzahlZeilen; j++)
-        //     {
-        //         newSpalte.Add(new Feld());   
-        //     }
-        //     
-        //     SpielfeldInhalt.Add(newSpalte);
-        // }
-    }
-
+    { }
+    
     public Feld GetFeld(int x, int y)
     {
-        //Prüfen, ob Schlangekopf(done), Body oder Item hinter der X oder Y Koordinate ist
+        //Prüfen, ob Schlangekopf, Body oder Item hinter der X oder Y Koordinate ist
         if (SchlangenKopf.x == x && SchlangenKopf.y == y)
             return SchlangenKopf;
 

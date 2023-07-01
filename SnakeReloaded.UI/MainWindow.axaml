@@ -6,6 +6,9 @@
         x:Class="SnakeReloaded.UI.MainWindow"
         Title="SnakeReloaded.UI">
     <StackPanel>
+        <Label Content="Snake Reloaded" FontSize="30"/>
+        <Label x:Name="score" Content="Punktestand: 100"/>
+        <Button Content="Restart" Click="Button_OnClick"/>
         <Canvas x:Name="MainArea">
             <Border BorderBrush="Black"
                     BorderThickness="2">
@@ -13,6 +16,6 @@
             </Border>
         </Canvas>
         
-        <Label x:Name="output"></Label>
+        <Label x:Name="output" Content="test"></Label>
     </StackPanel>
 </Window>

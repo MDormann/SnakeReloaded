@@ -7,6 +7,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
 using SnakeReloaded.UI.Models;
@@ -140,7 +141,19 @@ public partial class MainWindow : Window
                         [!Grid.RowProperty] = new IndexerBinding(SpielfeldGrid, new AttachedProperty<int>("Row", typeof(Grid), new(y)), BindingMode.Default),
                         [!Grid.ColumnProperty] = new IndexerBinding(SpielfeldGrid, new AttachedProperty<int>("Column", typeof(Grid), new(x)), BindingMode.Default),
                     };
-                } else if (feld is ItemFeld)
+                } 
+                else if (feld is GameOverItemFeld)
+                {
+                    uiElement = new Ellipse()
+                    {                        
+                        Width = 20,
+                        Height = 20,
+                        Fill = Brushes.Black,
+                        [!Grid.RowProperty] = new IndexerBinding(SpielfeldGrid, new AttachedProperty<int>("Row", typeof(Grid), new(y)), BindingMode.Default),
+                        [!Grid.ColumnProperty] = new IndexerBinding(SpielfeldGrid, new AttachedProperty<int>("Column", typeof(Grid), new(x)), BindingMode.Default),
+                    };
+                }
+                else if (feld is ItemFeld)
                 {
                     uiElement = new Ellipse()
                     {                        
@@ -201,5 +214,10 @@ public partial class MainWindow : Window
             nextZeile = _spielfeld.AnzahlZeilen-1;
         
         return new Position(nextSpalte, nextZeile);
+    }
+
+    private void Button_OnClick(object? sender, RoutedEventArgs e)
+    {
+        //Hier kommt die Logik zum Restart rein.
     }
 }
